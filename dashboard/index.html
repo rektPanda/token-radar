@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div>
+      <p class="eyebrow">Token launch radar &middot; model radar-2</p>
+      <h1>Token Radar</h1>
+      <p class="lede">Every protocol that records no token, ranked by what its token would be worth if the protocol&rsquo;s record stayed as it is &mdash; and what to do to farm each one before it issues one.</p>
+    </div>
+    <dl class="stats" id="stats"></dl>
+  </div>
+</header>
+
+<main>
+  <nav class="tabs" aria-label="Views">
+    <button id="tab-board" class="tab active" type="button">Pre-token board</button>
+    <button id="tab-live" class="tab" type="button">Live tokens</button>
+    <button id="tab-model" class="tab" type="button">How the value is built</button>
+  </nav>
+
+  <section id="view-board" class="view">
+    <div class="controls">
+      <label class="ctl">Search
+        <input id="q" type="search" placeholder="Name or slug&hellip;" autocomplete="off">
+      </label>
+      <label class="ctl">Category
+        <select id="category"><option value="all">All categories</option></select>
+      </label>
+      <label class="ctl">Chain
+        <select id="chain"><option value="all">All chains</option></select>
+      </label>
+      <label class="ctl">Sort by
+        <select id="sort">
+          <option value="implied">Implied value (high to low)</option>
+          <option value="tvl">TVL (high to low)</option>
+          <option value="growth">7-day change (high to low)</option>
+          <option value="age">Age (oldest first)</option>
+          <option value="rank">Rank (1 first)</option>
+        </select>
+      </label>
+      <label class="check"><input id="watchonly" type="checkbox"> Watchlist only</label>
+    </div>
+    <p class="count" id="count" aria-live="polite"></p>
+    <div class="table-wrap">
+      <table id="board">
+        <thead>
+          <tr>
+            <th class="num">Rank</th>
+            <th>Protocol</th>
+            <th>Category</th>
+            <th>Chains</th>
+            <th class="num">TVL</th>
+            <th class="num">7-day</th>
+            <th class="num">Age</th>
+            <th class="num">Implied value</th>
+            <th>Farm plan</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint">Select a row to open its detail view: the model&rsquo;s arithmetic for that protocol and its six farm steps.</p>
+  </section>
+
+  <section id="view-live" class="view" hidden>
+    <p class="lede">These protocols already have a token that trades. The board never ranks them: their value is the market&rsquo;s, not a model&rsquo;s. They are here so the reader can tell the two groups apart at a glance.</p>
+    <div class="table-wrap">
+      <table id="live">
+        <thead>
+          <tr>
+            <th>Protocol</th>
+            <th>Category</th>
+            <th>Chains</th>
+            <th class="num">TVL</th>
+            <th class="num">Market cap</th>
+            <th class="num">7-day</th>
+          </tr>
+        </thead>
+        <tbody id="live-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="view-model" class="view" hidden>
+    <h2>How the value is built</h2>
+    <p>One function scores every protocol. Nothing in it names a protocol: the same arithmetic ranks the whole board.</p>
+    <pre class="formula">implied = TVL &times; 0.25 &times; growth &times; maturity &times; breadth &times; category
+
+growth    = 1 + clamp(7-day change, &minus;60%, +120%) &divide; 100 &times; 0.8
+maturity  = 0.5 + 0.5 &times; min(age in days, 1460) &divide; 1460
+breadth   = 1 + 0.05 &times; min(chains, 5)
+category  = 0.9 + 0.2 &times; (category TVL &divide; largest category TVL)</pre>
+    <dl class="model-notes" id="model-notes"></dl>
+    <h3>Who gets ranked</h3>
+    <p>A protocol is ranked when its record carries no token (no market cap, no CoinGecko id, no symbol), and it is not an exchange, a versioned pool, or a wrapped, staked or bridged product of a token that already trades. The watchlist is the floor: all 40 of its protocols are on the board, and the board adds every other protocol that passes the same rule, at any TVL.</p>
+    <h3>What the number is not</h3>
+    <p>The implied value is this entry&rsquo;s own claim about what a token would be worth if the protocol&rsquo;s record stayed as it is. It does not predict whether or when a token is issued.</p>
+  </section>
+</main>
+
+<aside id="detail" class="detail" hidden aria-label="Protocol detail">
+  <button id="detail-close" class="detail-close" type="button" aria-label="Close detail">&times;</button>
+  <div id="detail-body"></div>
+</aside>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
